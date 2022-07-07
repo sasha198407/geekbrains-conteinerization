@@ -11,7 +11,7 @@ spec:
       app: postgresql
   strategy:
     rollingUpdate:
-      maxSurge: 1
+      maxSurge: 0
       maxUnavailable: 1
     type: RollingUpdate
   template:
@@ -42,6 +42,8 @@ spec:
                 key: key1
           - name: POSTGRES_DB
             value: testdatabase
+          - name: PGDATA
+            value: pgdata
         volumeMounts:
         - name: pgdata
           mountPath: /var/lib/postgresql/data/pgdata
