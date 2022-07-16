@@ -1,0 +1,68 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-redmine
+  namespace: lesson5
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-redmine
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: app-redmine
+    spec:
+      containers:
+      - image: redmine:4.1.1
+        name: redmine
+        ports:
+        - containerPort: 3000
+#          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 3000
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 60
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 3000
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 60
+          initialDelaySeconds: 10
+#        resources:
+#          requests:
+#            cpu: 100m
+#            memory: 100Mi
+#          limits:
+#            cpu: 100m
+#            memory: 100Mi
+        env:
+          - name: REDMINE_DB_POSTGRES
+            value: database
+          - name: REDMINE_DB_USERNAME
+            value: testuser
+          - name: REDMINE_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: secret-pg
+                key: key1
+          - name: REDMINE_DB_DATABASE
+            value: testdatabase
+          - name: REDMINE_SECRET_KEY_BASE
+            valueFrom:
+              secretKeyRef:
+                name: secret-pg
+                key: key2

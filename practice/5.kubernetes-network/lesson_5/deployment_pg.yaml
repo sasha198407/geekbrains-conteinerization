@@ -1,0 +1,53 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-pg
+  namespace: lesson5
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pg
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: pg
+    spec:
+      containers:
+      - image: postgres:10.13
+        name: postgresql
+        ports:
+        - containerPort: 5432
+          protocol: TCP
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 100m
+            memory: 100Mi
+        env:
+          - name: POSTGRES_USER
+            value: testuser
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: secret-pg
+                key: key1
+          - name: POSTGRES_DB
+            value: testdatabase
+          - name: PGDATA
+            value: pgdata
+        volumeMounts:
+        - name: pgdata
+          mountPath: /var/lib/postgresql/data/pgdata
+      volumes:
+      - name: pgdata
+        persistentVolumeClaim:
+          claimName: pvc-pg
