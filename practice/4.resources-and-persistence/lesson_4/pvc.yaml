@@ -16,7 +16,7 @@ spec:
   nfs:
     server: 10.0.0.31
     path: "/shares/share-282210b9-cf88-46e9-890e-9cd026d39a51"
-  persistentVolumeReclaimPolicy: "Recycle"
+  persistentVolumeReclaimPolicy: "Retain"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
