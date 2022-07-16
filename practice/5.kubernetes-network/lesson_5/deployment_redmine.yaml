@@ -24,7 +24,6 @@ spec:
         name: redmine
         ports:
         - containerPort: 3000
-#          protocol: TCP
         readinessProbe:
           failureThreshold: 3
           httpGet:
@@ -42,13 +41,6 @@ spec:
           successThreshold: 1
           timeoutSeconds: 60
           initialDelaySeconds: 10
-#        resources:
-#          requests:
-#            cpu: 100m
-#            memory: 100Mi
-#          limits:
-#            cpu: 100m
-#            memory: 100Mi
         env:
           - name: REDMINE_DB_POSTGRES
             value: database
