@@ -40,7 +40,7 @@ metadata:
     app: gitlab-runner
 type: Opaque
 stringData:
-  runner-registration-token: <CHANGE ME>
+  runner-registration-token: GR1348941Tmdc7nFQgwNw7e49CsdC
   runner-token: ""
 ---
 apiVersion: v1
@@ -152,7 +152,7 @@ spec:
       initContainers:
       - name: configure
         command: ['sh', '/config/configure']
-        image: gitlab/gitlab-runner:alpine-v13.2.0
+        image: gitlab-org/gitlab-runner
         imagePullPolicy: "IfNotPresent"
         env:
         - name: CI_SERVER_URL

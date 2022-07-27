@@ -1,0 +1,77 @@
+---
+apiVersion: apps/v1
+#описание типа сущности - StatefulSet
+kind: StatefulSet
+metadata:
+#обьявление имени сущности
+  name: prometheus
+spec:
+#сервис к которому будет привязан pod
+  serviceName: prometheus
+#создание 1-го пода
+  replicas: 1
+  selector:
+    matchLabels:
+#метка по которой StatefulSet связан с подом
+      app: prometheus
+  template:
+    metadata:
+      labels:
+#метка пода
+        app: prometheus
+    spec:
+      serviceAccount: prometheus
+      terminationGracePeriodSeconds: 10
+      initContainers:
+      - image: busybox
+        name: mount-permissions-fix
+        command: ["sh", "-c", "chmod 777 /prometheus"]
+        volumeMounts:
+        - name: data
+          mountPath: /prometheus
+#описание контейнера
+      containers:
+#имя контейнера
+        - name: prometheus-k8s
+#образ из которого создается контейнер
+          image: prom/prometheus:v2.19.2
+          ports:
+#протокол используемый для работы
+            - protocol: TCP
+#порт используемый для работы
+              containerPort: 9090
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/prometheus
+            - name: data
+              mountPath: /prometheus
+      volumes:
+        - name: config-volume
+          configMap:
+            name: prometheus-config
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - prometheus
+                topologyKey: kubernetes.io/hostname
+#запрос на предоставление хранилища
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+#права на чтени-запись
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+#размер хранилища 5Gi
+            storage: 5Gi
+#создание блочного устройства в качестве хранилища
+        storageClassName: "csi-ceph-hdd-ms1"
